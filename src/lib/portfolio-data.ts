@@ -4,6 +4,7 @@ export interface Project {
   url: string;
   description?: string | null;
   sort_order: number;
+  thumbnail_url?: string | null;
 }
 
 // Fallback list used if the database is unreachable or empty. Ordered the way
@@ -27,3 +28,5 @@ export function screenshotUrl(url: string): string {
   // Free screenshot service — no signup, no AI images.
   return `https://image.thum.io/get/width/800/crop/600/noanimate/${encodeURIComponent(url)}`;
 }
+
+export const THUMBNAIL_BUCKET = "project-thumbnails";
