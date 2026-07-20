@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { ADMIN_EMAIL, type Project } from "@/lib/portfolio-data";
-import { ArrowUp, ArrowDown, Trash2, Plus, LogOut, Loader2, ExternalLink } from "lucide-react";
+import { ADMIN_EMAIL, THUMBNAIL_BUCKET, screenshotUrl, type Project } from "@/lib/portfolio-data";
+import { ArrowUp, ArrowDown, Trash2, Plus, LogOut, Loader2, ExternalLink, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -77,12 +77,38 @@ function AdminDashboard({ email }: { email: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, title, url, description, sort_order")
+        .select("id, title, url, description, sort_order, thumbnail_url")
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return (data ?? []) as Project[];
     },
   });
+
+  async function uploadThumb(p: Project, file: File) {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${p.id}-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from(THUMBNAIL_BUCKET)
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { alert(upErr.message); return; }
+    // Remove old file if it was a storage path
+    if (p.thumbnail_url && !/^https?:\/\//i.test(p.thumbnail_url)) {
+      await supabase.storage.from(THUMBNAIL_BUCKET).remove([p.thumbnail_url]);
+    }
+    const { error } = await supabase.from("projects").update({ thumbnail_url: path }).eq("id", p.id);
+    if (error) { alert(error.message); return; }
+    await refetch();
+    qc.invalidateQueries({ queryKey: ["projects"] });
+  }
+
+  async function clearThumb(p: Project) {
+    if (p.thumbnail_url && !/^https?:\/\//i.test(p.thumbnail_url)) {
+      await supabase.storage.from(THUMBNAIL_BUCKET).remove([p.thumbnail_url]);
+    }
+    await supabase.from("projects").update({ thumbnail_url: null }).eq("id", p.id);
+    await refetch();
+    qc.invalidateQueries({ queryKey: ["projects"] });
+  }
 
   async function addProject(e: React.FormEvent) {
     e.preventDefault();
@@ -192,40 +218,91 @@ function AdminDashboard({ email }: { email: string }) {
             <div className="p-6 text-center text-sm text-muted-foreground">No projects yet.</div>
           )}
           {projects.map((p, i) => (
-            <div key={p.id} className="flex items-center gap-3 p-4">
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold">{p.title}</div>
-                <a href={p.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-                  {p.url} <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-              <button
-                disabled={i === 0}
-                onClick={() => move(p, -1)}
-                className="rounded border border-border p-1.5 disabled:opacity-30"
-                aria-label="Move up"
-              >
-                <ArrowUp className="h-4 w-4" />
-              </button>
-              <button
-                disabled={i === projects.length - 1}
-                onClick={() => move(p, 1)}
-                className="rounded border border-border p-1.5 disabled:opacity-30"
-                aria-label="Move down"
-              >
-                <ArrowDown className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => remove(p.id)}
-                className="rounded border border-border p-1.5 text-destructive hover:bg-destructive/10"
-                aria-label="Delete"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
+            <ProjectRow
+              key={p.id}
+              p={p}
+              first={i === 0}
+              last={i === projects.length - 1}
+              onMove={move}
+              onDelete={remove}
+              onUpload={uploadThumb}
+              onClearThumb={clearThumb}
+            />
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProjectRow({
+  p, first, last, onMove, onDelete, onUpload, onClearThumb,
+}: {
+  p: Project;
+  first: boolean;
+  last: boolean;
+  onMove: (p: Project, dir: -1 | 1) => void;
+  onDelete: (id: string) => void;
+  onUpload: (p: Project, file: File) => Promise<void>;
+  onClearThumb: (p: Project) => Promise<void>;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const preview = p.thumbnail_url && /^https?:\/\//i.test(p.thumbnail_url)
+    ? p.thumbnail_url
+    : screenshotUrl(p.url);
+  return (
+    <div className="flex items-center gap-3 p-4">
+      <div className="h-14 w-20 shrink-0 overflow-hidden rounded border border-border bg-secondary">
+        <img src={preview} alt="" className="h-full w-full object-cover object-top" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate font-semibold">{p.title}</div>
+        <a href={p.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+          <span className="truncate">{p.url}</span> <ExternalLink className="h-3 w-3 shrink-0" />
+        </a>
+        <div className="mt-1 flex items-center gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              setBusy(true);
+              await onUpload(p, f);
+              setBusy(false);
+              if (fileRef.current) fileRef.current.value = "";
+            }}
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={busy}
+            className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[11px] disabled:opacity-60"
+          >
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+            {p.thumbnail_url ? "Replace image" : "Upload image"}
+          </button>
+          {p.thumbnail_url && (
+            <button
+              onClick={() => onClearThumb(p)}
+              className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3 w-3" /> Use auto
+            </button>
+          )}
+        </div>
+      </div>
+      <button disabled={first} onClick={() => onMove(p, -1)} className="rounded border border-border p-1.5 disabled:opacity-30" aria-label="Move up">
+        <ArrowUp className="h-4 w-4" />
+      </button>
+      <button disabled={last} onClick={() => onMove(p, 1)} className="rounded border border-border p-1.5 disabled:opacity-30" aria-label="Move down">
+        <ArrowDown className="h-4 w-4" />
+      </button>
+      <button onClick={() => onDelete(p.id)} className="rounded border border-border p-1.5 text-destructive hover:bg-destructive/10" aria-label="Delete">
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }
