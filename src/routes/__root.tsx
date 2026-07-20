@@ -88,18 +88,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Your business deserves a better website. Web design & development with fast turnaround.",
+          "Altairagency24 builds fast, modern websites that turn visitors into customers. Web design, development, and ongoing support — DM for a free quote.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Altairagency24 — Web Design & Development" },
+      { name: "twitter:description", content: "Altairagency24 builds fast, modern websites that turn visitors into customers. Web design, development, and ongoing support — DM for a free quote." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/665b12ba-f340-45d7-904e-5a1e3f510a76/id-preview-ac11a497--9dba2866-16bb-4051-a45a-2242d6b7dcd2.lovable.app-1784563757681.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/665b12ba-f340-45d7-904e-5a1e3f510a76/id-preview-ac11a497--9dba2866-16bb-4051-a45a-2242d6b7dcd2.lovable.app-1784563757681.png" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
