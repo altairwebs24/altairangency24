@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
-import logoAsset from "@/assets/altair-logo.png.asset.json";
+const LOGO_URL = "/altair-logo.png";
 
 export const WHATSAPP =
   "https://wa.me/27736627793?text=Hi%20Altairagency24%2C%20I%27d%20like%20a%20quote%20for%20a%20website.";
@@ -15,7 +15,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
         <Link to="/" className="flex items-center gap-2.5">
           <img
-            src={logoAsset.url}
+            src={LOGO_URL}
             alt="Altairagency24"
             className="h-9 w-9 object-contain"
           />
@@ -47,7 +47,7 @@ export function SiteFooter() {
     <footer className="bg-background">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row">
         <div className="flex items-center gap-2">
-          <img src={logoAsset.url} alt="" className="h-7 w-7 object-contain" />
+          <img src={LOGO_URL} alt="" className="h-7 w-7 object-contain" />
           <span className="text-sm">ALTAIRAGENCY<span className="font-serif-accent">24</span></span>
         </div>
         <p className="text-[11px] uppercase tracking-widest text-foreground/60">
