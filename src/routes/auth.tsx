@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ADMIN_EMAIL } from "@/lib/portfolio-data";
 import { Loader2, LogIn } from "lucide-react";
-import logoAsset from "@/assets/altair-logo.png.asset.json";
+const LOGO_URL = "/altair-logo.png";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -59,7 +59,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <img src={logoAsset.url} alt="Altairagency24" className="h-14 w-14 rounded-full object-contain" />
+          <img src={LOGO_URL} alt="Altairagency24" className="h-14 w-14 rounded-full object-contain" />
           <h1 className="text-xl font-bold">Admin sign in</h1>
           <p className="text-xs text-muted-foreground">Only {ADMIN_EMAIL} can manage projects.</p>
         </div>
