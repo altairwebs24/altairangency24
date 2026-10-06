@@ -28,12 +28,12 @@ function Card({ p }: { p: Project }) {
       rel="noreferrer"
       className="group block border border-foreground bg-background transition hover:-translate-y-1"
     >
-      <div className="aspect-[9/14] w-full overflow-hidden border-b border-foreground bg-secondary">
+      <div className="flex aspect-[4/3] w-full items-end justify-center overflow-hidden border-b border-foreground bg-secondary px-4 pt-5">
         <img
           src={img}
           alt={`${p.title} website`}
           loading="lazy"
-          className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.04]"
+          className="h-full w-auto aspect-[9/16] rounded-t-2xl border-x-4 border-t-4 border-foreground object-cover object-top shadow-lg transition duration-500 group-hover:-translate-y-1"
           onError={(e) => { (e.currentTarget as HTMLImageElement).src = fallbackScreenshotUrl(p.url); }}
         />
       </div>
