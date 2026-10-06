@@ -32,8 +32,21 @@ export const FALLBACK_PROJECTS: Project[] = [
 export const ADMIN_EMAIL = "altairwebs24@gmail.com";
 
 export function screenshotUrl(url: string): string {
-  // Free screenshot service — no signup, no AI images.
-  return `https://image.thum.io/get/width/800/crop/600/noanimate/${encodeURIComponent(url)}`;
+  // Mobile-viewport screenshot (raw URL, not encoded — thum.io needs it raw).
+  return `https://image.thum.io/get/width/600/crop/1100/viewportWidth/390/noanimate/${url}`;
 }
 
+export function fallbackScreenshotUrl(url: string): string {
+  return `https://s0.wp.com/mshots/v1/${encodeURIComponent(url)}?w=600&h=1100&vpw=390&vph=715`;
+}
+
+export const isLovableSite = (url: string) => /\.lovable\.app/i.test(url);
+
+/** Newest first, lovable.app sites always last. */
+export function orderProjects(list: Project[]): Project[] {
+  return [...list].sort((a, b) => {
+    const la = isLovableSite(a.url) ? 1 : 0, lb = isLovableSite(b.url) ? 1 : 0;
+    return la - lb || b.sort_order - a.sort_order;
+  });
+}
 export const THUMBNAIL_BUCKET = "project-thumbnails";
