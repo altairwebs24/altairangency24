@@ -152,7 +152,7 @@ function ProjectCard({ p }: { p: import("@/lib/portfolio-data").Project }) {
       rel="noreferrer"
       className="group block border border-foreground bg-background transition hover:-translate-y-1"
     >
-      <div className="flex aspect-[4/3] w-full items-end justify-center overflow-hidden border-b border-foreground bg-secondary px-4 pt-5">
+      <div className="flex aspect-[4/3] w-full items-end justify-start overflow-hidden border-b border-foreground bg-secondary px-4 pt-5">
         <img
           src={img}
           alt={`${p.title} website`}
