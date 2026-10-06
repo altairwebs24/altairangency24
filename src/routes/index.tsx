@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter, WHATSAPP, EMAIL, PHONE, INSTAGRAM, TIKTOK } from "@/components/site-chrome";
 import { useProjects } from "@/lib/use-projects";
-import { screenshotUrl } from "@/lib/portfolio-data";
+import { fallbackScreenshotUrl, isLovableSite, orderProjects, screenshotUrl } from "@/lib/portfolio-data";
 import {
   ArrowRight, ArrowUpRight, Mail, Phone, MessageCircle, Instagram,
   Music2, Clock, ShieldCheck, Search, TrendingUp, Smartphone, Globe,
@@ -159,7 +159,7 @@ function ProjectCard({ p }: { p: import("@/lib/portfolio-data").Project }) {
           loading="lazy"
           className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.04]"
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = screenshotUrl(p.url);
+            (e.currentTarget as HTMLImageElement).src = fallbackScreenshotUrl(p.url);
           }}
         />
       </div>
@@ -177,7 +177,7 @@ function ProjectCard({ p }: { p: import("@/lib/portfolio-data").Project }) {
 function LatestWork() {
   const { data: projects = [] } = useProjects();
   // "Last 3" = 3 most recently added (highest sort_order).
-  const latest = [...projects].sort((a, b) => b.sort_order - a.sort_order).slice(0, 3);
+  const latest = orderProjects(projects.filter((p) => !isLovableSite(p.url))).slice(0, 3);
   return (
     <section id="work" className="border-b border-foreground">
       <div className="mx-auto max-w-7xl px-5 py-20 sm:py-28">

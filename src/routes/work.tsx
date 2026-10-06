@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useProjects } from "@/lib/use-projects";
-import { screenshotUrl, type Project } from "@/lib/portfolio-data";
+import { fallbackScreenshotUrl, isLovableSite, orderProjects, screenshotUrl, type Project } from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/work")({
   head: () => ({
@@ -34,7 +34,7 @@ function Card({ p }: { p: Project }) {
           alt={`${p.title} website`}
           loading="lazy"
           className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.04]"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = screenshotUrl(p.url); }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = fallbackScreenshotUrl(p.url); }}
         />
       </div>
       <div className="flex items-center justify-between gap-2 p-4">
@@ -50,7 +50,7 @@ function Card({ p }: { p: Project }) {
 
 function WorkPage() {
   const { data: projects = [] } = useProjects();
-  const sorted = [...projects].sort((a, b) => b.sort_order - a.sort_order);
+  const sorted = orderProjects(projects);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
