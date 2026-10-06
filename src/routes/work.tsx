@@ -28,7 +28,7 @@ function Card({ p }: { p: Project }) {
       rel="noreferrer"
       className="group block border border-foreground bg-background transition hover:-translate-y-1"
     >
-      <div className="aspect-[4/3] w-full overflow-hidden border-b border-foreground bg-secondary">
+      <div className="aspect-[9/14] w-full overflow-hidden border-b border-foreground bg-secondary">
         <img
           src={img}
           alt={`${p.title} website`}
