@@ -20,7 +20,6 @@ export const FALLBACK_PROJECTS: Project[] = [
   { id: "f-12", title: "Urbanfield", url: "https://urbanfield.altairwebs24.workers.dev", sort_order: 120 },
   { id: "f-13", title: "Mahamba Kitchen Projects", url: "https://mahamba-kitchen-projects.altairwebs24.workers.dev/", sort_order: 130 },
   { id: "f-14", title: "Flipaholics", url: "https://flipaholics.co.za", sort_order: 140 },
-  { id: "f-15", title: "Floor2Frames Solutions", url: "https://floor2frames-solutions.altairwebs24.workers.dev", sort_order: 150 },
 ];
 
 export const ADMIN_EMAIL = "altairwebs24@gmail.com";
